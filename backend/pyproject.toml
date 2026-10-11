@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fenrix"
+version = "1.0.0"
+description = "Software supply-chain triage: which application do we fix first?"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115,<1",
+  "uvicorn[standard]>=0.34",
+  "sqlalchemy>=2.0.36,<3",
+  "pydantic-settings>=2.7",
+  "pyjwt>=2.10",
+  "httpx>=0.28",
+  "defusedxml>=0.7",
+]
+
+[project.optional-dependencies]
+postgres = ["psycopg[binary]>=3.2"]
+dev = ["pytest>=8.3", "ruff>=0.8"]
+
+[project.scripts]
+fenrix = "fenrix.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["fenrix*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.ruff]
+line-length = 140
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["B008"]
+
+[tool.ruff.lint.per-file-ignores]
+# curated data tables read better unwrapped
+"fenrix/knowledge/*" = ["E501"]
+"fenrix/seed.py" = ["E501"]

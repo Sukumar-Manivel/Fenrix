@@ -1,0 +1,25 @@
+# Drop this into another repository as .github/workflows/fenrix-gate.yml.
+# The pull request fails if it adds a library Fenrix blocks (bad license for
+# how the app is shipped, a known malicious release, or a serious vulnerability).
+name: Fenrix dependency gate
+
+on:
+  pull_request:
+    paths: ["package.json", "package-lock.json", "requirements.txt", "pyproject.toml", "pom.xml", "go.mod"]
+
+jobs:
+  fenrix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install Fenrix
+        run: pip install "git+https://github.com/Sukumar-Manivel/Fenrix.git#subdirectory=backend"
+      - name: Check dependencies
+        # usage: distributed (shipped to clients) | saas (hosted service) | internal
+        run: |
+          for f in package.json requirements.txt pom.xml go.mod; do
+            [ -f "$f" ] && fenrix scan "$f" --usage saas
+          done
